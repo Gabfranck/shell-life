@@ -40,6 +40,7 @@ else
   done
 fi
 
+pid=0
 
 function chose_pattern {
   start=0
@@ -249,7 +250,8 @@ ready_to_evolve=0
 			ready_to_evolve=1
       return
 		;;
-    'b' )
+    'q' )
+      tput cnorm
       exit
     ;;
 		'' )
@@ -420,7 +422,7 @@ set -m
 evolve &
 set +m
 pid=$!
-trap "kill -INT $pid && tput cnorm && kill 0" EXIT
+trap "kill -INT $pid && tput cnorm " EXIT
 
 
 function controls {
@@ -490,14 +492,12 @@ while [[ closed -eq 0 ]]; do
       evolve &
       set +m
       pid=$!
-      trap "kill -INT $pid && tput cnorm && kill 0" EXIT
+      trap "kill -INT $pid && tput cnorm " EXIT
       controls
     ;;
     'q')
       tput cnorm
       kill -INT $pid
-      echo "exiting"
-      kill 0
       exit
     ;;
 	esac
