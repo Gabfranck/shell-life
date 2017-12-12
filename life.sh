@@ -1,5 +1,4 @@
 #!/bin/bash
-trap "tput cnorm && kill 0" EXIT
 declare -A matrix
 num_lines_temp=$(tput lines)
 num_cols_temp=$(tput cols)
@@ -250,6 +249,9 @@ ready_to_evolve=0
 			ready_to_evolve=1
       return
 		;;
+    'b' )
+      exit
+    ;;
 		'' )
 			clear
 			if [[ ${matrix[$x_cursor,$y_cursor]} != "\e[1;30m██\e[0m" ]]; then
@@ -396,7 +398,7 @@ while [[ stopped -eq 0 ]]; do
     if [[ $gen -eq 2 ]]; then
       start=$last
     fi
-    echo -e "\t\e[37mstart / pause : space/enter/hjkl\t\e[0;37m|\tsave starting pattern : s\t\e[0;37m|\update starting pattern : u\t\e[0;37m|\tquit : q\e[1;37m"
+    echo -e "\t\e[37mstart / pause : space/enter\t\e[0;37m|\treturn to edit : r\t\e[0;37m|\tsave starting pattern : s\t\e[0;37m|\tupdate starting pattern : u\t\e[0;37m|\tquit : q\e[1;37m"
     for (( i = 0; i < num_cols_temp; i++ )); do
       printf "_"
     done
@@ -411,12 +413,15 @@ while [[ stopped -eq 0 ]]; do
         echo
     done
 done
+
 }
 
 set -m
 evolve &
 set +m
 pid=$!
+trap "kill -INT $pid && tput cnorm && kill 0" EXIT
+
 
 function controls {
 
@@ -485,6 +490,7 @@ while [[ closed -eq 0 ]]; do
       evolve &
       set +m
       pid=$!
+      trap "kill -INT $pid && tput cnorm && kill 0" EXIT
       controls
     ;;
     'q')
