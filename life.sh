@@ -10,12 +10,8 @@ if [[ $1 = *.txt ]]; then
   declare -A matrix           # declare associative array arr
   declare -A loaded           # declare associative array arr
 
-
-
   row=0
   while read -r -a line; do
-
-
     for ((col=0; col<${#line[@]}; col++)); do
       if [[ ${line[$col]} -eq 0 ]]; then
         loaded[$col,$row]="\e[8m██\e[0m"
@@ -29,9 +25,14 @@ if [[ $1 = *.txt ]]; then
 
   for ((i=0;i<num_cols;i++)) do
     for ((j=0;j<num_lines;j++)) do
-      matrix[$i,$j]=${loaded[$i,$j]}
+      if [[ -z ${loaded[$i,$j]+x} ]]; then
+        matrix[$i,$j]="\e[8m██\e[0m"
+      else
+        matrix[$i,$j]=${loaded[$i,$j]}
+      fi
     done
   done
+
 else
   for ((i=0;i<num_cols;i++)) do
     for ((j=0;j<num_lines;j++)) do
@@ -57,16 +58,23 @@ function chose_pattern {
 
   x_cursor=$(($num_cols / 2))
   y_cursor=$(($num_lines / 2))
-  matrix[$x_cursor,$y_cursor]="\e[1;30m██\e[0m"
+  if [[ ${matrix[$x_cursor,$y_cursor]} == "\e[8m██\e[0m" ]]; then
+    matrix[$x_cursor,$y_cursor]="\e[1;30m██\e[0m"
+  elif [[ ${matrix[$x_cursor,$y_cursor]} == "\e[0;31m██\e[0m" ]]; then
+    matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
+  fi
 
 clear
-echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-for (( i = 0; i < num_cols_temp; i++ )); do
-  printf "_"
-done
-echo
-echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-echo -e "\e[1;35malive at start :\t${start}\e[0m"
+function edit_controls {
+  echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
+  for (( i = 0; i < num_cols_temp; i++ )); do
+    printf "_"
+  done
+  echo
+  echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
+  echo -e "\e[1;35malive at start :\t${start}\e[0m"
+}
+edit_controls
 for ((j=0;j<num_lines;j++)) do
     for ((i=0;i<num_cols;i++)) do
         printf ${matrix[$i,$j]}
@@ -103,13 +111,7 @@ ready_to_evolve=0
 			elif [[ ${matrix[$x_cursor,$y_cursor]} == "\e[0;31m██\e[0m" ]]; then
 				matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
 			fi
-      echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-      for (( i = 0; i < num_cols_temp; i++ )); do
-        printf "_"
-      done
-      echo
-      echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-      echo -e "\e[1;35malive at start :\t${start}\e[0m"
+      edit_controls
 
 			for ((j=0;j<num_lines;j++)) do
 			    for ((i=0;i<num_cols;i++)) do
@@ -133,13 +135,7 @@ ready_to_evolve=0
 			elif [[ ${matrix[$x_cursor,$y_cursor]} == "\e[0;31m██\e[0m" ]]; then
 				matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
 			fi
-      echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-      for (( i = 0; i < num_cols_temp; i++ )); do
-        printf "_"
-      done
-      echo
-      echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-      echo -e "\e[1;35malive at start :\t${start}\e[0m"
+      edit_controls
 
 			for ((j=0;j<num_lines;j++)) do
 					for ((i=0;i<num_cols;i++)) do
@@ -167,13 +163,7 @@ ready_to_evolve=0
 			elif [[ ${matrix[$x_cursor,$y_cursor]} == "\e[0;31m██\e[0m" ]]; then
 				matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
 			fi
-      echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-      for (( i = 0; i < num_cols_temp; i++ )); do
-        printf "_"
-      done
-      echo
-      echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-      echo -e "\e[1;35malive at start :\t${start}\e[0m"
+      edit_controls
 			for ((j=0;j<num_lines;j++)) do
 					for ((i=0;i<num_cols;i++)) do
 							printf ${matrix[$i,$j]}
@@ -196,13 +186,7 @@ ready_to_evolve=0
 			elif [[ ${matrix[$x_cursor,$y_cursor]} == "\e[0;31m██\e[0m" ]]; then
 				matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
 			fi
-      echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-      for (( i = 0; i < num_cols_temp; i++ )); do
-        printf "_"
-      done
-      echo
-      echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-      echo -e "\e[1;35malive at start :\t${start}\e[0m"
+      edit_controls
 			for ((j=0;j<num_lines;j++)) do
 					for ((i=0;i<num_cols;i++)) do
 							printf ${matrix[$i,$j]}
@@ -264,13 +248,7 @@ ready_to_evolve=0
 				matrix[$x_cursor,$y_cursor]="\e[1;31m██\e[0m"
 			fi
 
-      echo -e "\t\e[37mmove cursor : arrow keys/hjkl\t\e[0;37m|\tchange cell : space/enter\t\e[0;37m|\t\e[1;32m start : s \t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive : \e[1;31mp \t\e[0;37m|\t\e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: r\t\e[0;37m|\t\e[1;31mprogre\e[0;31mssive \e[0;37mand \e[1;36mr\e[1;31ma\e[1;32mn\e[1;33md\e[1;34mo\e[1;35mm \e[1;37m: b"
-      for (( i = 0; i < num_cols_temp; i++ )); do
-        printf "_"
-      done
-      echo
-      echo -e "\e[1;34mgeneration : \t\t${gen}\e[0m"
-      echo -e "\e[1;35malive at start :\t${start}\e[0m"
+      edit_controls
 			for ((j=0;j<num_lines;j++)) do
 					for ((i=0;i<num_cols;i++)) do
 							printf ${matrix[$i,$j]}
